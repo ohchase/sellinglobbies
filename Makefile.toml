@@ -1,0 +1,38 @@
+[tasks.format]
+install_crate = "rustfmt"
+command = "cargo"
+args = ["fmt", "--", "--emit=files"]
+
+[tasks.build]
+command = "cargo"
+args = ["build"]
+dependencies = ["format"]
+
+[tasks.test]
+command = "cargo"
+args = ["test"]
+dependencies = ["build"]
+
+[tasks.ainject]
+workspace = false
+script = '''    
+cross build --target aarch64-linux-android
+adb shell "su -c 'rm /data/local/tmp/libpayload.so'"
+adb push target/aarch64-linux-android/debug/libpayload.so /data/local/tmp
+adb shell "su -c 'chcon -v u:object_r:apk_data_file:s0 /data/local/tmp/libpayload.so'"
+'''
+
+[tasks.uinject]
+install_crate = "yaui"
+workspace = false
+dependencies = ["build"]
+# Need to run it with sudo for some reason?
+script = "sudo `(which yaui)` --target rs2client --payload target/debug/libpayload.so"
+
+
+[tasks.winject]
+install_crate = "yai"
+workspace = false
+dependencies = ["build"]
+command = "yai"
+args = ["--target", "rs2client.exe", "--payload", "target/debug/payload.dll"]
