@@ -32,10 +32,10 @@ tracing-android = "0.2.0"
 proc-maps = "0.3.1"
 
 [dependencies]
-glow = "0.12.2"
+glow = "0.13.1"
 
-egui = { version = "0.22.0" }
-egui_glow = "0.22.0"
+egui = { version = "0.26.1" }
+egui_glow = "0.26.1"
 
 tracing = "0.1.37"
 tracing-subscriber = "0.3.17"
