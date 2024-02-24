@@ -196,8 +196,9 @@ impl PayloadContext {
     fn render(&mut self) {
         let egui::FullOutput {
             platform_output: _platform_output,
-            repaint_after: _repaint_after,
             textures_delta,
+            pixels_per_point,
+            viewport_output: _viewport_output,
             shapes,
         } = self.egui_ctx.run(Default::default(), |ui| {
             egui::SidePanel::left("my_side_panel").show(ui, |ui| {
@@ -211,20 +212,14 @@ impl PayloadContext {
         let shapes = std::mem::take(&mut self.shapes);
         let mut textures_delta = std::mem::take(&mut self.textures_delta);
 
-        for (id, image_delta) in textures_delta.set {
-            self.painter.set_texture(id, &image_delta);
-        }
-
-        let clipped_primitives = self.egui_ctx.tessellate(shapes);
-        self.painter.paint_primitives(
+        let clipped_primitives = self.egui_ctx.tessellate(shapes,pixels_per_point);
+        self.painter.paint_and_update_textures(
             self.dimensions,
             self.egui_ctx.pixels_per_point(),
             &clipped_primitives,
+            &textures_delta,
         );
 
-        for id in textures_delta.free.drain(..) {
-            self.painter.free_texture(id);
-        }
     }
 }
 
